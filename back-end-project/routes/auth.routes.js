@@ -21,4 +21,33 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// login route to find the user by email and check if they know the password
+router.post("/login", async (req, res) => {
+  try {
+    // find the user by their email
+    const foundUser = await UserModel.findOne({ email: req.body.email });
+    if (!foundUser) {
+      res.status(400).json({ errorMessage: "Email not found" });
+    } else {
+      // if we find the user by their email we then compare their password (from the DB and the frontend)
+      const passwordFromFrontend = req.body.password;
+      const passwordHashedInDB = foundUser.password;
+      const passwordsMatch = bcryptjs.compareSync(
+        passwordFromFrontend,
+        passwordHashedInDB
+      );
+      //console.log("password match ? ", passwordsMatch);
+      if (!passwordsMatch) {
+        res.status(400).json({ errorMessage: "Password incorrect" });
+      } else {
+        
+        res.status(200).json({ message: "you are logged in!" });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
 module.exports = router;
