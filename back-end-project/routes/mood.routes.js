@@ -71,26 +71,31 @@ res.status(500).json({ errorMessage: "Could not delete mood" });
 // Count each mood and return stats
 router.get('/stats', async (req, res) => {
     try {
-    const stats = await Mood.aggregate([
-    {
-    $group: {
-    _id: '$mood',
-    count: { $sum: 1 }
-    }
-    }
-    ]);
-    
-    const formatted = {};
-    stats.forEach((entry) => {
-    formatted[entry._id] = entry.count;
-    });
-    
-    res.status(200).json(formatted);
+      const { userId } = req.query; // Get the user ID from the query parameters
+      if (!userId) {
+        return res.status(400).json({ errorMessage: "User ID is required" });
+      }
+      const stats = await Recommendation.aggregate([
+        {
+          $match: { user: userId }, // Filter recommendations by the user ID
+        },
+        {
+          $group: {
+            _id: '$mood', // Group by the mood field
+            count: { $sum: 1 }, // Count the number of occurrences for each mood
+          },
+        },
+      ]);
+      const formatted = {};
+      stats.forEach((entry) => {
+        formatted[entry._id] = entry.count; // Format the results into an object
+      });
+      res.status(200).json(formatted); // Send the formatted stats as a response
     } catch (err) {
-    console.log("Error generating mood stats:", err);
-    res.status(500).json({ errorMessage: "Could not fetch mood statistics" });
+      console.log("Error generating mood stats:", err);
+      res.status(500).json({ errorMessage: "Could not fetch mood statistics" });
     }
-    });
+  });
 
 
 module.exports = router;
