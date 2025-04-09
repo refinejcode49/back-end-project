@@ -1,27 +1,48 @@
-const {Schema,model}=require('mongoose')
+const { Schema, model } = require("mongoose");
 
-const recommendationSchema=new Schema(
-   {
-    category:{
-        type:String,
-        required:true,
-        enum:['movie','song','book','quote'],
+const recommendationSchema = new Schema(
+  {
+    category: {
+      type: String,
+      required: true,
+      enum: ["movie", "song", "book", "quote", "podcast"],
     },
-    content:{
-        type:String,
-        required:true,
+    title: {
+      type: String,
+      required: true,
     },
-    link:String,
-    mood:{
-        type:String,
-        required:true,
-        enum:['happy','sad','angry','anxious','romantic','bored'],
+    creator: {
+      type: String,
+      required: true,
     },
-    user:{
-        type:Schema.Types.ObjectId,
-        ref:'User',
+    description: {
+      type: String,
     },
-   },
-   {timestamp:true}
-)
-module.exports=model('Recommendation',recommendationSchema)
+    url: {
+      type: String,
+    },
+    mood: {
+      type: String,
+      required: true,
+      enum: [
+        "happy",
+        "sad",
+        "angry",
+        "tired",
+        "anxious",
+        "romantic",
+        "bored",
+        "calm",
+      ],
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamp: true }
+);
+
+const RecommendationModel = model("Recommendation", recommendationSchema);
+
+module.exports = RecommendationModel;

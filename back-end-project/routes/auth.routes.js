@@ -58,6 +58,19 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.get("/profile/:userId", async (req, res) => {
+  try {
+    const currentUser = await UserModel.findById(req.params.userId);
+    const userCopy = currentUser;
+    userCopy.password = null;
+
+    res.status(200).json(userCopy);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
 // route to check if the token is present and valid
 router.get("/verify", isAuthenticated, async (req, res) => {
   console.log("here in the verify route");
