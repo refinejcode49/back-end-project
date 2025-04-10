@@ -86,6 +86,7 @@ router.get('/stats', async (req, res) => {
           },
         },
       ]);
+      console.log("Stats:",stats);
       const formatted = {};
       stats.forEach((entry) => {
         formatted[entry._id] = entry.count; // Format the results into an object
