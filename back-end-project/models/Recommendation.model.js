@@ -21,6 +21,9 @@ const recommendationSchema = new Schema(
     url: {
       type: String,
     },
+    image: {
+      type: String,
+    },
     mood: {
       type: String,
       required: true,

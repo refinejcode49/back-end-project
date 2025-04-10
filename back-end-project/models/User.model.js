@@ -24,6 +24,10 @@ const userSchema = new Schema(
     profileImage: {
       type: String,
     },
+    entry:{
+      type:Schema.Types.ObjectId,
+      ref:'MoodLog'
+  },
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
