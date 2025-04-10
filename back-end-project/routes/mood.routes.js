@@ -75,7 +75,7 @@ router.get('/stats', async (req, res) => {
       if (!userId) {
         return res.status(400).json({ errorMessage: "User ID is required" });
       }
-      const stats = await Recommendation.aggregate([
+      const stats = await Mood.aggregate([
         {
           $match: { user: userId }, // Filter recommendations by the user ID
         },
@@ -86,6 +86,10 @@ router.get('/stats', async (req, res) => {
           },
         },
       ]);
+      if (stats.length === 0) {
+        console.log("No stats found for the given user.");
+        return res.status(200).json({});
+      }
       console.log("Stats:",stats);
       const formatted = {};
       stats.forEach((entry) => {
