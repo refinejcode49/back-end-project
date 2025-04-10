@@ -42,6 +42,7 @@ router.post("/create-recommendation", async (req, res) => {
       description,
       url,
       mood,
+      image,
     });
     res.status(201).json(newReco);
   } catch (error) {
