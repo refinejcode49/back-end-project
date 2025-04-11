@@ -33,16 +33,26 @@ router.get("/mood", async (req, res, next) => {
 });
 
 router.post("/create-recommendation", async (req, res) => {
-  const { category, title, creator, description, url, mood } = req.body;
-  try {
+  const { category, title, creator, description, url, mood,image,user } = req.body;
+  try{
+    if(Array.isArray(mood)){
+      return res.status(400).json({errorMessage:"Mood must be a String ,not an array"})
+    }
+  
+  
     const newReco = await Recommendation.create({
       category,
       title,
       creator,
       description,
       url,
-      mood,
       image,
+      mood,
+<<<<<<< HEAD
+      image,
+=======
+      user
+>>>>>>> eb7d0b0623e95fbbf8256b9f7d14eb437fcff5b3
     });
     res.status(201).json(newReco);
   } catch (error) {
@@ -50,7 +60,8 @@ router.post("/create-recommendation", async (req, res) => {
     res
       .status(500)
       .json({ errorMessage: "Trouble creating your recommendation" });
-  }
+  
+}
 });
 
 router.get("/recommendation/:id", async (req, res) => {

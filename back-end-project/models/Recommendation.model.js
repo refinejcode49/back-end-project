@@ -31,16 +31,17 @@ const recommendationSchema = new Schema(
         "happy",
         "sad",
         "angry",
-        "tired",
+    
         "anxious",
         "romantic",
         "bored",
-        "calm",
+        
       ],
     },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required:true
     },
   },
   { timestamp: true }
