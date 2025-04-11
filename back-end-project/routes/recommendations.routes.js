@@ -32,7 +32,7 @@ router.get("/mood", async (req, res, next) => {
 });
 
 router.post("/create-recommendation", async (req, res) => {
-  const { category, title, creator, description, url, mood } = req.body;
+  const { category, title, creator, description, url, user, mood } = req.body;
   try {
     const newReco = await RecommendationModel.create({
       category,
@@ -41,6 +41,7 @@ router.post("/create-recommendation", async (req, res) => {
       description,
       url,
       mood,
+      user,
       image,
     });
     res.status(201).json(newReco);
