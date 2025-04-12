@@ -72,6 +72,7 @@ router.delete("/delete/:moodId", async (req, res) => {
       res.status(500).json({ errorMessage: "Could not delete mood" });
     });
 });
+
 // ===== STATS: GET /mood/stats =====
 // Count each mood and return stats
 router.get("/stats", async (req, res) => {

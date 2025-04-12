@@ -1,11 +1,12 @@
 const router = require("express").Router();
 const express = require("express");
 const RecommendationModel = require("../models/Recommendation.model");
+const { isAuthenticated } = require("../middlewares/jwt.middleware");
 
 // Get all recommendations (no mood filter)
 router.get("/all-recommendations", async (req, res) => {
   try {
-    const recommendations = await RecommendationModel.find();
+    const recommendations = await RecommendationModel.find().populate("user");
     res.status(201).json(recommendations);
   } catch (error) {
     console.log(error);
@@ -32,23 +33,16 @@ router.get("/mood", async (req, res, next) => {
 });
 
 router.post("/create-recommendation", async (req, res) => {
-  const { category, title, creator, description, url, mood,image,user } = req.body;
-  try{
-    if(Array.isArray(mood)){
-      return res.status(400).json({errorMessage:"Mood must be a String ,not an array"})
-    }
-  
-  
+  const { category, title, creator, description, image, mood, user } = req.body;
+  try {
     const newReco = await RecommendationModel.create({
       category,
       title,
       creator,
       description,
-      url,
       image,
       mood,
-      image,
-      user
+      user,
     });
     res.status(201).json(newReco);
   } catch (error) {
@@ -71,32 +65,81 @@ router.get("/recommendation/:id", async (req, res) => {
   }
 });
 
-router.put("/recommendation/:id", async (req, res) => {
-  try {
-    const updatedReco = await RecommendationModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    console.log("recommendation updated ", updatedReco);
-    res.status(200).json(updatedReco);
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ errorMessage: "Trouble updating your recommendation" });
+router.put(
+  "/recommendation/update-recommendation/:recommendationId",
+  async (req, res) => {
+    const { category, title, creator, description, image, mood } = req.body;
+    try {
+      const updatedReco = await RecommendationModel.findByIdAndUpdate(
+        req.params.recommendationId,
+        req.body,
+        { new: true }
+      );
+      console.log("recommendation updated ", updatedReco);
+      res.status(200).json(updatedReco);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ errorMessage: "Trouble updating your recommendation" });
+    }
   }
-});
+);
 
-router.delete("/recommendation/:id", async (req, res) => {
+router.delete(
+  "/recommendation/delete-recommendation/:recommendationId",
+  async (req, res) => {
+    try {
+      const deletedRecommendation = await RecommendationModel.findByIdAndDelete(
+        req.params.recommendationId
+      );
+
+      if (!deletedRecommendation) {
+        return res.status(404).json({ message: "Recommendation not found" });
+      }
+
+      res
+        .status(204)
+        .json({ message: "Recommendation deleted", deletedRecommendation});
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ errorMessage: "Trouble deleting your recommendation" });
+    }
+  }
+);
+
+// GET Routes to get the recommendation favorited or avoided by an userId
+router.get("/user-recommendations/:userId", async (req, res) => {
   try {
-    await RecommendationModel.findByIdAndDelete(req.params.id);
-    res.status(204).json({ message: "Recommendation deleted" });
+    const { userId } = req.params;
+
+    const userRecoDoc = await UserRecommendationModel.findOne({ user: userId });
+
+    if (!userRecoDoc) {
+      return res.status(200).json({ favorites: [], avoided: [] });
+    }
+
+    // get the favortied recommendation
+    const favoriteRecs = await RecommendationModel.find({
+      _id: { $in: userRecoDoc.favorites },
+    });
+
+    // get the recommendation avoided
+    const avoidedRecs = await RecommendationModel.find({
+      _id: { $in: userRecoDoc.avoided },
+    });
+
+    res.status(200).json({
+      favorites: favoriteRecs,
+      avoided: avoidedRecs,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching user recommendations:", error);
     res
       .status(500)
-      .json({ errorMessage: "Trouble deleting your recommendation" });
+      .json({ errorMessage: "Unable to fetch user recommendations" });
   }
 });
 
