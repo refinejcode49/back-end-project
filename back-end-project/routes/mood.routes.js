@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { default: mongoose, get } = require("mongoose");
 const MoodLogModel = require("../models/MoodLog.model");
 
 // ===== CREATE: POST /mood/create =====
@@ -74,35 +75,40 @@ router.delete("/delete/:moodId", async (req, res) => {
 });
 
 // ===== STATS: GET /mood/stats =====
-// Count each mood and return stats
-router.get("/stats", async (req, res) => {
+
+router.get("/mood-stats/:userId", async (req, res) => {
+  const { userId } = req.params; 
+  /*const sevendaysAgo = new Date();
+  sevendaysAgo.setDate(sevendaysAgo.getDate() - 6);*/
+
   try {
-    const { userId } = req.query; // Get the user ID from the query parameters
-    if (!userId) {
-      return res.status(400).json({ errorMessage: "User ID is required" });
-    }
+    
     const stats = await MoodLogModel.aggregate([
       {
-        $match: { user: userId }, // Filter recommendations by the user ID
-      },
+        $match: {
+           user: new mongoose.Types.ObjectId(userId),
+          //date: { $gte: sevendaysAgo }
+        }
+     }, 
       {
         $group: {
-          _id: "$mood", // Group by the mood field
-          count: { $sum: 1 }, // Count the number of occurrences for each mood
+          _id: {
+            day: {
+              $dayOfMonth: "$date" }, 
+              mood: "$mood" },
+          count: {
+            $sum: 1 }
+          }
         },
-      },
+        {
+          $sort: {
+            "_id.day": 1, count: -1
+          }
+        }
     ]);
 
-    if (stats.length === 0) {
-      console.log("No stats found for the given user.");
-      return res.status(200).json({});
-    }
-
-    const formatted = {};
-    stats.forEach((entry) => {
-      formatted[entry._id] = entry.count; // Format the results into an object
-    });
-    res.status(200).json(formatted); // Send the formatted stats as a response
+      
+    res.status(200).json(stats); 
   } catch (err) {
     console.log("Error generating mood stats:", err);
     res.status(500).json({ errorMessage: "Could not fetch mood statistics" });
