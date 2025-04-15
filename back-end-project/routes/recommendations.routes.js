@@ -110,37 +110,5 @@ router.delete(
   }
 );
 
-// GET Routes to get the recommendation favorited or avoided by an userId
-router.get("/user-recommendations/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    const userRecoDoc = await UserRecommendationModel.findOne({ user: userId });
-
-    if (!userRecoDoc) {
-      return res.status(200).json({ favorites: [], avoided: [] });
-    }
-
-    // get the favortied recommendation
-    const favoriteRecs = await RecommendationModel.find({
-      _id: { $in: userRecoDoc.favorites },
-    });
-
-    // get the recommendation avoided
-    const avoidedRecs = await RecommendationModel.find({
-      _id: { $in: userRecoDoc.avoided },
-    });
-
-    res.status(200).json({
-      favorites: favoriteRecs,
-      avoided: avoidedRecs,
-    });
-  } catch (error) {
-    console.error("Error fetching user recommendations:", error);
-    res
-      .status(500)
-      .json({ errorMessage: "Unable to fetch user recommendations" });
-  }
-});
 
 module.exports = router;
