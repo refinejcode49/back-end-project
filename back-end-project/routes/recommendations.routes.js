@@ -50,8 +50,7 @@ router.post("/create-recommendation", async (req, res) => {
     res
       .status(500)
       .json({ errorMessage: "Trouble creating your recommendation" });
-  
-}
+  }
 });
 
 router.get("/recommendation/:id", async (req, res) => {
@@ -74,7 +73,7 @@ router.put(
         req.params.recommendationId,
         req.body,
         { new: true }
-      );
+      ).populate("user");
       console.log("recommendation updated ", updatedReco);
       res.status(200).json(updatedReco);
     } catch (error) {
@@ -100,7 +99,7 @@ router.delete(
 
       res
         .status(204)
-        .json({ message: "Recommendation deleted", deletedRecommendation});
+        .json({ message: "Recommendation deleted", deletedRecommendation });
     } catch (error) {
       console.log(error);
       res
@@ -109,6 +108,5 @@ router.delete(
     }
   }
 );
-
 
 module.exports = router;
